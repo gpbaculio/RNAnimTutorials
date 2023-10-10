@@ -9,7 +9,6 @@ import {
   PathOp,
   Shader,
   Fill,
-  mixColors,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useMemo } from "react";
 import {
