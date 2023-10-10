@@ -25,6 +25,7 @@ uniform shader image;
 uniform vec2 head;
 uniform float progress;
 uniform vec4 color;
+uniform float r;
 
 vec2 rotate(in vec2 coord, in float angle, vec2 origin) {
   vec2 coord1 = coord - origin;
@@ -34,6 +35,14 @@ vec2 rotate(in vec2 coord, in float angle, vec2 origin) {
  }
 
 vec4 main(vec2 xy) {
+  float d = distance(xy, head);
+  vec2 rotated = rotate(xy,${-Math.PI}- progress * ${2 * Math.PI}, head);
+  if (rotated.y > head.y) {
+    return vec4(0, 0, 0, 0);
+  }
+  if(d > r) { 
+    return vec4(0, 0, 0, smoothstep(35, 0, d));
+  }
   if (progress > 1) {
     return color;
   }
@@ -92,25 +101,25 @@ export const Ring = ({
     return fullPath;
   });
 
-  const head = useDerivedValue(() => {
-    const point = path.value.getLastPt()!;
-    return point;
-  });
-  const headClip = useDerivedValue(() => {
-    const c = path.value.getLastPt()!;
-    const progress = trim.value * totalProgress;
-    const p = Skia.Path.Make();
-    p.addRect(
-      Skia.XYWHRect(c.x - strokeWidth, c.y, strokeWidth * 2, strokeWidth * 2)
-    );
-    const angle = (progress % 1) * 2 * Math.PI;
-    const m = Skia.Matrix();
-    m.translate(c.x, c.y);
-    m.rotate(angle);
-    m.translate(-c.x, -c.y);
-    p.transform(m);
-    return p;
-  });
+  // const head = useDerivedValue(() => {
+  //   const point = path.value.getLastPt()!;
+  //   return point;
+  // });
+  // const headClip = useDerivedValue(() => {
+  //   const c = path.value.getLastPt()!;
+  //   const progress = trim.value * totalProgress;
+  //   const p = Skia.Path.Make();
+  //   p.addRect(
+  //     Skia.XYWHRect(c.x - strokeWidth, c.y, strokeWidth * 2, strokeWidth * 2)
+  //   );
+  //   const angle = (progress % 1) * 2 * Math.PI;
+  //   const m = Skia.Matrix();
+  //   m.translate(c.x, c.y);
+  //   m.rotate(angle);
+  //   m.translate(-c.x, -c.y);
+  //   p.transform(m);
+  //   return p;
+  // });
 
   const matrix = useDerivedValue(() => {
     const m = Skia.Matrix();
@@ -125,8 +134,10 @@ export const Ring = ({
   });
 
   const uniforms = useDerivedValue(() => {
+    const head = path.value.getLastPt();
     return {
-      head: head.value,
+      head,
+      r: strokeWidth / 2,
       progress: trim.value * totalProgress,
       color: [...Skia.Color(colors[1])],
     };
@@ -153,12 +164,14 @@ export const Ring = ({
         >
           <SweepGradient colors={colors} c={center} matrix={matrix} />
         </Path>
-        <Circle clip={headClip} c={head} r={strokeWidth / 2} color={colors[1]}>
+        {/* <Circle clip={headClip} c={head} r={strokeWidth / 2} color={colors[1]}> */}
+        <Fill>
           <Shader source={source} uniforms={uniforms}>
             <SweepGradient colors={colors} c={center} matrix={matrix} />
-            <Shadow dx={0} dy={0} color="black" blur={15} />
+            {/* <Shadow dx={0} dy={0} color="black" blur={15} /> */}
           </Shader>
-        </Circle>
+        </Fill>
+        {/* </Circle> */}
       </Group>
     </Group>
   );
