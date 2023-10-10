@@ -101,7 +101,7 @@ export const Ring = ({
     const progress = trim.value * totalProgress;
     const p = Skia.Path.Make();
     p.addRect(
-      Skia.XYWHRect(c.x - strokeWidth / 2, c.y, strokeWidth, strokeWidth)
+      Skia.XYWHRect(c.x - strokeWidth, c.y, strokeWidth * 2, strokeWidth * 2)
     );
     const angle = (progress % 1) * 2 * Math.PI;
     const m = Skia.Matrix();
